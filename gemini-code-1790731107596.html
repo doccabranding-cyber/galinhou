@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#6c38ff">
+<title>Galinhou — O Galinheiro Mais Problemático do Brasil</title>
+<style>
+:root{
+  --primary:#6c38ff;--primary-dark:#481fb8;--pink:#ff5c9f;--yellow:#ffc83d;
+  --orange:#ff8c37;--green:#2ec4b6;--blue:#3a86ff;--red:#ff4d6d;
+  --bg-gradient:radial-gradient(circle at 20% 15%,rgba(255,255,255,.95),transparent 30%),linear-gradient(135deg,#e9e0ff 0%,#fff2e3 50%,#fce1c6 100%);
+  --card-bg:rgba(255,255,255,0.92);--shadow:0 12px 30px rgba(45,26,77,.12);--radius:24px;
+  --text:#2b2238;--muted:#726780
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;min-height:100vh;font-family:'Inter',system-ui,-apple-system,sans-serif;color:var(--text);background:var(--bg-gradient);overflow-x:hidden}
+button{border:0;font:inherit;cursor:pointer;transition:transform .12s ease, filter .12s ease}
+button:active{transform:scale(0.95)}
+button:disabled{cursor:not-allowed;opacity:.45;transform:none!important}
+.hidden{display:none!important}
+
+.screen{min-height:100vh;padding:14px;display:flex;flex-direction:column;justify-content:center;align-items:center}
+.selection-wrap{width:min(1180px,100%);margin:auto}
+.brand{text-align:center;margin-bottom:20px}
+.brand .egg{font-size:44px;display:inline-block;animation:bounce 2s infinite ease-in-out}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.brand h1{margin:2px 0 6px;font-size:clamp(2.1rem, 7vw, 3.8rem);letter-spacing:-2px;color:var(--primary-dark);font-weight:950}
+.brand p{margin:0 auto;color:var(--muted);max-width:700px;font-size:0.95rem;line-height:1.35;padding:0 8px}
+
+.selection-grid{display:grid;grid-template-columns:340px minmax(0,1fr);gap:18px;align-items:start}
+.panel-glass{background:var(--card-bg);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.9);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+/* Card da Diretora na Seleção */
+.director-home-card{background:linear-gradient(145deg,#fff0f6,#ffe3ef);border:2px solid #ffb1d3;padding:20px;border-radius:var(--radius);box-shadow:0 10px 25px rgba(255,92,159,.12);display:flex;flex-direction:column;align-items:center;text-align:center}
+.director-home-avatar{width:100px;height:100px;border-radius:50%;object-fit:cover;border:4px solid #fff;box-shadow:0 8px 20px rgba(0,0,0,.12);margin-bottom:12px;background:#ffd1ea}
+.director-home-card h3{margin:0 0 4px;color:#9c1c5c;font-size:1.3rem;font-weight:900}
+.director-home-card p{margin:0 0 14px;font-size:.84rem;color:#7c4e66}
+.director-missions-preview{width:100%;text-align:left;background:#fff;padding:12px;border-radius:16px;margin-bottom:14px;max-height:180px;overflow-y:auto;border:1px solid #ffd1ea}
+.director-missions-preview h4{margin:0 0 8px;font-size:.88rem;color:#9c1c5c}
+.mission-preview-item{font-size:.8rem;padding:6px 0;border-bottom:1px solid #f9e6f2;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.mission-preview-item.done{text-decoration:line-through;opacity:.5}
+
+.chicken-selection-card{padding:20px}
+.chicken-selection-card h2{text-align:center;margin:0 0 16px;font-size:1.35rem;color:var(--primary-dark)}
+.chicken-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.chicken-option{background:#fff;border:3px solid transparent;border-radius:20px;padding:10px;box-shadow:0 8px 20px rgba(50,30,70,.05);transition:.2s;display:flex;flex-direction:column;text-align:center}
+.chicken-option:hover{transform:translateY(-4px);border-color:var(--primary)}
+.chicken-option img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:14px;background:linear-gradient(135deg,#ffeab8,#eadcff)}
+.chicken-option .name{font-weight:950;margin:10px 4px 4px;font-size:1rem}
+.chicken-option .hint{color:var(--muted);font-size:.78rem;margin:0 4px 14px;min-height:38px;line-height:1.25}
+.select-btn{width:100%;padding:12px;border-radius:14px;color:white;font-weight:900;background:linear-gradient(135deg,var(--primary),var(--primary-dark));box-shadow:0 6px 16px rgba(108,56,255,.25);font-size:.92rem}
+
+/* Jogo Principal */
+.game-shell{max-width:1200px;margin:auto;width:100%;padding-bottom:20px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.logo-small{font-weight:950;color:var(--primary-dark);font-size:1.4rem;display:flex;align-items:center;gap:6px}
+.coin-pill{display:flex;align-items:center;gap:6px;background:#fff;border-radius:999px;padding:8px 16px;box-shadow:0 6px 18px rgba(45,26,77,.08);font-weight:900;font-size:1rem}
+
+.stats-panel{padding:14px;margin-bottom:10px}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat-head{display:flex;justify-content:space-between;font-weight:900;font-size:.82rem;margin-bottom:4px}
+.bar{height:14px;background:#eee7f5;border-radius:999px;overflow:hidden;box-shadow:inset 0 2px 4px rgba(0,0,0,.05)}
+.bar-fill{width:50%;height:100%;border-radius:inherit;transition:width .4s cubic-bezier(0.4,0,0.2,1)}
+#hungerFill{background:linear-gradient(90deg,#ff6b4a,#ffbe42)}
+#hygieneFill{background:linear-gradient(90deg,#2ec4b6,#3a86ff)}
+#funFill{background:linear-gradient(90deg,#ff5c9f,#8338ec)}
+
+.game-layout{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:12px}
+.pet-stage{position:relative;min-height:480px;overflow:hidden;border-radius:30px;background:linear-gradient(180deg,#d2b996 0%,#a88157 55%,#74502f 100%);box-shadow:var(--shadow);border:2px solid rgba(255,255,255,.6)}
+.barn-light{position:absolute;width:220px;height:220px;border-radius:50%;top:20px;left:50%;transform:translateX(-50%);background:rgba(255,246,215,.3);filter:blur(18px)}
+.wood-beam{position:absolute;inset:0 0 auto;height:75px;background:repeating-linear-gradient(90deg,#4d3221 0 50px,#5e3d29 50px 58px);opacity:.9;box-shadow:0 8px 16px rgba(0,0,0,.2)}
+.floor{position:absolute;inset:auto 0 0;height:34%;background:repeating-linear-gradient(0deg,rgba(255,255,255,.04) 0 4px,rgba(0,0,0,.08) 4px 8px),#7a5636}
+.straw{position:absolute;bottom:12%;left:5%;right:5%;height:75px;opacity:.55;background:repeating-linear-gradient(165deg,transparent 0 15px,#e3be6d 16px 20px,transparent 21px 30px)}
+.party-flags{position:absolute;top:65px;left:0;right:0;height:40px;background:linear-gradient(15deg,transparent 0 10%,#ff7597 10% 16%,transparent 16% 26%,#ffc83d 26% 32%,transparent 32% 42%,#9d75ff 42% 48%,transparent 48% 58%,#2ec4b6 58% 64%,transparent 64% 74%,#ff7597 74% 80%,transparent 80%);opacity:.85}
+
+.pet-wrap{position:absolute;left:50%;bottom:10%;transform:translateX(-50%);width:min(60%,360px);text-align:center;z-index:5}
+.pet-image{width:100%;max-height:360px;object-fit:contain;filter:drop-shadow(0 20px 16px rgba(0,0,0,.25));animation:idle 3s ease-in-out infinite;user-select:none;touch-action:none}
+@keyframes idle{0%,100%{transform:translateY(0) rotate(-.8deg)}50%{transform:translateY(-7px) rotate(.8deg)}}
+.pet-name{display:inline-block;background:#fff;padding:7px 16px;border-radius:999px;font-weight:950;box-shadow:0 6px 18px rgba(0,0,0,.15);font-size:.95rem;color:var(--primary-dark)}
+
+.speech{position:absolute;top:100px;right:4%;max-width:240px;padding:12px 16px;border-radius:18px;background:#fff;box-shadow:0 8px 22px rgba(0,0,0,.15);font-weight:800;font-size:.88rem;opacity:0;transform:translateY(8px) scale(.95);transition:.25s cubic-bezier(0.34,1.56,0.64,1);pointer-events:none;z-index:20}
+.speech.show{opacity:1;transform:translateY(0) scale(1)}
+.speech:after{content:"";position:absolute;bottom:-8px;left:22px;border-width:9px 9px 0 0;border-style:solid;border-color:#fff transparent transparent}
+
+.overlay-label{position:absolute;left:12px;top:12px;background:rgba(255,255,255,.9);padding:6px 10px;border-radius:12px;font-size:.76rem;font-weight:900;z-index:6;box-shadow:0 3px 10px rgba(0,0,0,.08)}
+
+/* Painel Lateral */
+.side-panel{display:flex;flex-direction:column;gap:10px}
+.panel{padding:14px;background:var(--card-bg);backdrop-filter:blur(16px);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid rgba(255,255,255,.9)}
+.panel h3{margin:0 0 10px;font-size:1.02rem;font-weight:900;color:var(--primary-dark)}
+.actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.action-btn{min-height:80px;border-radius:16px;padding:8px 4px;background:#f5f0ff;color:var(--text);font-weight:900;transition:.2s;border:2px solid transparent}
+.action-btn:hover{background:#ebdfff;border-color:var(--primary)}
+.action-btn .icon{display:block;font-size:26px;margin-bottom:4px}
+
+.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.quick{padding:12px;border-radius:14px;background:#f4f0f8;font-weight:900;color:var(--text);transition:.2s;border:2px solid transparent;font-size:.9rem}
+.quick:hover{background:#ebdfff;border-color:var(--primary)}
+.quick.primary{background:linear-gradient(135deg,#ede3ff,#dfccff);color:var(--primary-dark)}
+
+/* Widget da Diretora Carol */
+.director-widget{background:linear-gradient(135deg,#fff2f7,#ffe1ee);border:2px solid #ffabd1;border-radius:18px;padding:12px;display:flex;align-items:center;gap:12px;box-shadow:0 6px 16px rgba(255,92,159,.1)}
+.director-widget-avatar{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid #fff;flex-shrink:0;background:#ffd1ea}
+.director-widget-info{flex:1;min-width:0}
+.director-widget-info strong{display:block;color:#9c1c5c;font-size:.92rem;font-weight:950;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.director-widget-info span{font-size:.76rem;color:#7c4e66;display:block;margin-top:2px;line-height:1.2}
+.director-chat-btn{padding:8px 12px;border-radius:12px;background:linear-gradient(135deg,var(--pink),#d93880);color:#fff;font-weight:950;font-size:.78rem;white-space:nowrap;box-shadow:0 4px 12px rgba(255,92,159,.25)}
+
+.egg-box{display:flex;align-items:center;gap:10px;padding:12px;background:#fff9e6;border-radius:16px;border:2px dashed #f6c84c}
+.egg-icon{font-size:32px}
+.egg-info{flex:1;min-width:0}
+.egg-title{font-weight:950;color:#735400;font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.egg-timer{color:var(--muted);font-size:.78rem;margin-top:2px}
+.egg-btn{width:100%;margin-top:8px;padding:11px;border-radius:14px;font-weight:950;color:#533a00;background:linear-gradient(135deg,#ffc83d,#ffa800);box-shadow:0 5px 15px rgba(255,168,0,.25);font-size:.9rem}
+
+.food-inventory{display:flex;justify-content:space-between;align-items:center;background:#f7f4ff;border-radius:14px;padding:10px 14px;border:1px solid #ebdfff}
+.food-count{font-weight:950;color:var(--primary-dark);font-size:1.15rem}
+
+.drag-food{display:flex;align-items:center;gap:10px;padding:10px;background:#fff9e6;border-radius:14px;border:2px dashed #f6c84c;margin-top:8px}
+.food-drag-item{font-size:32px;cursor:grab;touch-action:none;user-select:none;transition:transform .15s}
+.food-drag-item:active{cursor:grabbing;transform:scale(1.15)}
+.drop-hint{font-size:.78rem;color:var(--muted)}
+
+/* Modais sofisticados */
+.modal-backdrop{position:fixed;inset:0;background:rgba(30,20,45,.65);backdrop-filter:blur(6px);display:grid;place-items:center;padding:12px;z-index:100;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{width:min(680px,100%);max-height:88vh;overflow-y:auto;background:#fff;border-radius:28px;padding:22px;box-shadow:0 25px 70px rgba(0,0,0,.3);animation:scaleUp .22s cubic-bezier(0.34,1.56,0.64,1)}
+@keyframes scaleUp{from{transform:scale(0.88);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
+.modal-header h2{margin:0;font-size:1.35rem;color:var(--primary-dark);font-weight:950}
+.close-btn{width:38px;height:38px;border-radius:50%;background:#f4f0f8;font-size:1.1rem;font-weight:bold;color:var(--text);display:grid;place-items:center}
+
+.shop-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.tab{padding:8px 14px;border-radius:999px;background:#f4f0f8;font-weight:900;font-size:.84rem}
+.tab.active{background:var(--primary);color:#fff}
+.shop-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.shop-product{display:flex;align-items:center;gap:10px;padding:12px;background:#fbf9ff;border-radius:18px;border:1px solid #f0e8ff}
+.big-icon{font-size:34px}
+.product-copy{flex:1;min-width:0}
+.product-copy strong{display:block;font-size:.95rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.product-copy span{color:var(--muted);font-size:.78rem}
+.buy-btn{padding:10px 14px;border-radius:12px;background:var(--green);color:#fff;font-weight:950;box-shadow:0 5px 14px rgba(46,196,182,.25);font-size:.85rem;white-space:nowrap}
+
+.notice{padding:12px 14px;border-radius:16px;background:#fff7e6;color:#7a5500;font-size:.86rem;line-height:1.4;margin:10px 0;border:1px solid #ffe6b8}
+.quiz-q{font-size:1.1rem;font-weight:950;margin:12px 0;color:var(--primary-dark);line-height:1.35}
+.quiz-options{display:grid;gap:8px}
+.quiz-option{text-align:left;padding:13px;border-radius:14px;background:#f5f0fb;font-weight:800;color:var(--text);border:2px solid transparent;font-size:.9rem}
+.quiz-result{padding:13px;border-radius:14px;background:#eef8ff;margin-top:12px;font-weight:850;color:#1852a4;border:1px solid #d0e7ff;font-size:.9rem}
+
+.bath-area{position:relative;height:210px;border-radius:20px;background:linear-gradient(#bce8ff,#6fb7e2);overflow:hidden;touch-action:none;box-shadow:inset 0 8px 16px rgba(0,0,0,.1)}
+.bath-sponge{position:absolute;font-size:46px;left:20%;top:25%;cursor:grab;user-select:none;touch-action:none;filter:drop-shadow(0 6px 8px rgba(0,0,0,.2))}
+.furniture{position:absolute;z-index:6;user-select:none;touch-action:none;cursor:grab;font-size:52px;filter:drop-shadow(0 8px 6px rgba(0,0,0,.2))}
+
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:#2b2238;color:#fff;padding:12px 20px;border-radius:999px;opacity:0;transition:.3s cubic-bezier(0.34,1.56,0.64,1);z-index:200;font-weight:900;box-shadow:0 8px 24px rgba(0,0,0,.25);pointer-events:none;font-size:.9rem;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* Media Queries específicas para adaptação mobile total */
+@media(max-width:900px){
+  .selection-grid{grid-template-columns:1fr}
+  .game-layout{grid-template-columns:1fr}
+  .pet-stage{min-height:420px}
+  .chicken-grid{grid-template-columns:1fr}
+}
+@media(max-width:540px){
+  .screen{padding:10px}
+  .chicken-grid{grid-template-columns:1fr}
+  .shop-grid{grid-template-columns:1fr}
+  .quick-grid{grid-template-columns:1fr 1fr}
+  .pet-stage{min-height:380px}
+  .brand h1{font-size:2.2rem}
+}
+</style>
+</head>
+<body>
+
+<section id="selectionScreen" class="screen">
+  <div class="selection-wrap">
+    <div class="brand">
+      <span class="egg">🥚</span>
+      <h1>Galinhou</h1>
+      <p>Gerencie o galinheiro mais caótico do país. Satisfaça as exigências absurdas das galinhas, pague suas dívidas e ature a fiscalização rigorosa da Diretora Carolina.</p>
+    </div>
+    
+    <div class="selection-grid">
+      <!-- Painel da Diretora Carol na Tela Inicial -->
+      <div class="director-home-card panel-glass">
+        <img id="directorHomeImg" class="director-home-avatar" src="Diretora Carol - Galinha.png" alt="Diretora Carolina">
+        <h3>Diretora Carolina</h3>
+        <p>Inspetora Geral & Auditora de Galinheiros</p>
+        <div class="director-missions-preview" id="homeMissionsList">
+          <h4>📋 Metas de Auditoria de Hoje:</h4>
+        </div>
+        <button class="select-btn" onclick="App.openMissions()" style="background:linear-gradient(135deg,var(--pink),#b82269)">Relatório da Auditoria</button>
+      </div>
+
+      <div class="panel-glass chicken-selection-card">
+        <h2>🐔 Selecione sua Galinha de Incidência</h2>
+        <div id="chickenGrid" class="chicken-grid"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<main id="gameScreen" class="screen hidden">
+<div class="game-shell">
+  <header class="topbar">
+    <div class="logo-small">🐔 Galinhou</div>
+    <div class="coin-pill">🪙 <span id="coins">30</span> moedas</div>
+  </header>
+
+  <section class="panel-glass stats-panel">
+    <div class="stats-grid">
+      <div><div class="stat-head"><span>🍗 Fome</span><span id="hungerValue">100%</span></div><div class="bar"><div id="hungerFill" class="bar-fill"></div></div></div>
+      <div><div class="stat-head"><span>🧼 Higiene</span><span id="hygieneValue">100%</span></div><div class="bar"><div id="hygieneFill" class="bar-fill"></div></div></div>
+      <div><div class="stat-head"><span>🎉 Diversão</span><span id="funValue">100%</span></div><div class="bar"><div id="funFill" class="bar-fill"></div></div></div>
+    </div>
+  </section>
+
+  <div class="game-layout">
+    <section class="pet-stage" id="petStage">
+      <div class="overlay-label" id="scenarioLabel">🌾 Galinheiro Clássico</div>
+      <div class="wood-beam"></div>
+      <div class="party-flags"></div>
+      <div class="barn-light"></div>
+      <div class="floor"></div>
+      <div class="straw"></div>
+      <div id="speech" class="speech">Cócócó!</div>
+      <div class="pet-wrap">
+        <img id="petImage" class="pet-image" src="" alt="Galinha">
+        <div id="petName" class="pet-name">Minha Galinha</div>
+      </div>
+    </section>
+
+    <aside class="side-panel">
+      <!-- Widget da Diretora Carolina no Jogo -->
+      <div class="director-widget panel-glass" style="background:linear-gradient(135deg,#fff2f7,#ffe1ee)">
+        <img id="directorWidgetImg" class="director-widget-avatar" src="Diretora Carol - Galinha.png" alt="Diretora Carolina">
+        <div class="director-widget-info">
+          <strong>Diretora Carol</strong>
+          <span id="directorStatusText">Fiscalizando conformidade...</span>
+        </div>
+        <button class="director-chat-btn" onclick="App.openDirectorChat()">Auditar</button>
+      </div>
+
+      <section class="panel">
+        <h3>💜 Ações do Cuidador</h3>
+        <div class="actions">
+          <button class="action-btn" id="feedBtn"><span class="icon">🌽</span>Alimentar</button>
+          <button class="action-btn" id="bathBtn"><span class="icon">🛁</span>Banho</button>
+          <button class="action-btn" id="petBtn"><span class="icon">💗</span>Carinho</button>
+        </div>
+        <div class="drag-food">
+          <span id="foodDrag" class="food-drag-item" draggable="true">🌽</span>
+          <div><strong>Arraste o milho</strong><div class="drop-hint">Solte no bico da galinha</div></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h3>🎯 Centro de Controle</h3>
+        <div class="quick-grid">
+          <button class="quick primary" id="missionsBtn">📋 Metas</button>
+          <button class="quick primary" id="quizBtn">⚖️ Direito Agropunk</button>
+          <button class="quick" id="shopBtn">🛒 Loja</button>
+          <button class="quick" id="sceneryBtn">🏡 Decoração</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h3>🥚 Postura de Ovos</h3>
+        <div class="egg-box">
+          <div class="egg-icon">🥚</div>
+          <div class="egg-info">
+            <div id="eggTitle" class="egg-title">Produzindo...</div>
+            <div id="eggTimer" class="egg-timer">Calculando...</div>
+          </div>
+        </div>
+        <button id="eggBtn" class="egg-btn" disabled>Coletar e Vender (🪙 12)</button>
+      </section>
+
+      <section class="panel">
+        <h3>🌽 Despensa</h3>
+        <div class="food-inventory">
+          <span>Porções de milho</span>
+          <span id="foodCount" class="food-count">5</span>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h3>🧭 Gerenciamento</h3>
+        <div class="quick-grid">
+          <button id="changeChickenBtn" class="quick">🐔 Trocar Galinha</button>
+          <button id="resetBtn" class="quick" style="color:var(--red)">♻ Reiniciar</button>
+        </div>
+      </section>
+    </aside>
+  </div>
+</div>
+</main>
+
+<div id="modalHost"></div>
+<div id="toast" class="toast"></div>
+
+<script>
+/* =========================================================
+   GALINHOU — Motor Completo Mobile-Optimized v6
+   ========================================================= */
+const App = (() => {
+  "use strict";
+
+  const CONFIG = {
+    storageKey: "galinhou_v6_mobile",
+    eggCycle: 12 * 60 * 1000,
+    decay: { hunger: 4.5, hygiene: 2.8, fun: 3.2 },
+    action: { feed: 28, bath: 35, pet: 25 },
+    eggValue: 12
+  };
+
+  const CHICKENS = [
+    {
+      id: "maumau",
+      file: "Galinha - Mau Mau.png",
+      name: "Galinha Mau Mau",
+      hint: "Sênior, azedo e completamente farto das suas brincadeiras.",
+      quote: ["Minha coluna não é suporte técnico, humano.", "Na minha época, a grama era mais verde.", "Comer isso? Prefiro virar caldo de galinha."],
+      personality: "maumau"
+    },
+    {
+      id: "jararaca",
+      file: "Galinha - Jararaca.png",
+      name: "Galinha Jararaca",
+      hint: "Rica na pose, falida nas contas e cheia de processos.",
+      quote: ["Meu ex-namorado do galinheiro vizinho ligou de novo.", "Não estou endividada, estou investindo alto.", "Você chama isso de grão gourmet?"],
+      personality: "jararaca"
+    },
+    {
+      id: "patri",
+      file: "Galinha - Patri Little.png",
+      name: "Little Patri",
+      hint: "Mini porte, ego cósmico e certeza de dominar o mundo.",
+      quote: ["Eu inventei a física quântica às 4h no poleiro.", "Se você não entendeu minha genialidade, o problema é seu."],
+      personality: "patri"
+    }
+  ];
+
+  const SCENARIOS = [
+    { id: "classic", name: "Galinheiro Clássico", price: 0, emoji: "🌾", bg: "linear-gradient(180deg,#d2b996,#a88157 55%,#74502f)" },
+    { id: "luxury", name: "Mansão de Grife", price: 45, emoji: "💎", bg: "linear-gradient(180deg,#e8dcff,#bc9fe9 55%,#7450a7)" },
+    { id: "beach", name: "Praia das Penas", price: 65, emoji: "🏖️", bg: "linear-gradient(180deg,#a2e6ff,#5bc1df 55%,#cea361)" },
+    { id: "office", name: "Escritório da Auditoria", price: 90, emoji: "🏢", bg: "linear-gradient(180deg,#d8e2ed,#96a5b8 55%,#586370)" }
+  ];
+
+  const FURNITURE = [
+    { id: "bed", name: "Caminha Acolchoada", emoji: "🛏️", price: 18 },
+    { id: "roost", name: "Poleiro Imperial", emoji: "🪵", price: 28 },
+    { id: "tv", name: "TV de Tubo", emoji: "📺", price: 24 },
+    { id: "sofa", name: "Sofá Clandestino", emoji: "🛋️", price: 35 },
+    { id: "plant", name: "Samambaia Jurídica", emoji: "🪴", price: 15 },
+    { id: "gold", name: "Estátua de Ouro", emoji: "🗿", price: 60 }
+  ];
+
+  const QUIZ = [
+    { q: "Segundo o Código do Consumidor Galináceo, vender um ovo estragado sem aviso prévio configura:", a: ["Vício de qualidade por imprpriedade gravíssima", "Mero aborrecimento do poleiro", "Incentivo à culinária criativa", "Contrato verbal de risco"], c: 0, e: "Exato! A Diretora Carol anotou mais um ponto na ficha." },
+    { q: "Se a galinha contratada se recusar a ciscar por falta de motivação existencial, aplica-se:", a: ["Exceção de contrato não cumprido e greve", "Despejo imediato do terreiro", "Multa de 500 sacas de milho", "Promoção a gerente"], c: 0, e: "Correto. Teses de Jararaca reprovadas." },
+    { q: "Princípio constitucional que impede multas sem prévia fundamentação legal:", a: ["Princípio da Legalidade Estrita", "Princípio do Ovo Fresco", "Livre-arbítrio da Penugem", "Soberania do Galo Chefe"], c: 0, e: "Perfeito! A lei vale para todos." },
+    { q: "Configura dano moral indenizável quando:", a: ["Há violação de direitos da personalidade gerando dor vexatória", "A galinha fica sem Wi-Fi", "O milho vem com caruncho", "O ovo choca fora do prazo"], c: 0, e: "Excelente raciocínio jurídico!" }
+  ];
+
+  const DIRECTOR_QUOTES = [
+    "Atenção: galinheiro sem conformidade documental é convite para lacração!",
+    "Eu estou monitorando cada grão de milho que entra e sai do seu estoque.",
+    "Cumpram as metas agressivas de auditoria ou sofrerão sanções!",
+    "Essa galinha está extremamente improdutiva. Exijo relatórios!"
+  ];
+
+  let state = {
+    selectedChicken: 0,
+    hunger: 100,
+    hygiene: 100,
+    fun: 100,
+    coins: 35,
+    food: 6,
+    nextEggAt: Date.now() + CONFIG.eggCycle,
+    eggReady: false,
+    lastUpdate: Date.now(),
+    ownedScenarios: ["classic"],
+    scenario: "classic",
+    ownedFurniture: [],
+    furniture: [],
+    missions: [],
+    missionDay: "",
+    stats: { fed: 0, bath: 0, pet: 0, eggs: 0, quiz: 0, quizCorrect: 0 }
+  };
+
+  const $ = id => document.getElementById(id);
+  const save = () => localStorage.setItem(CONFIG.storageKey, JSON.stringify(state));
+  const clamp = (v, a = 0, b = 100) => Math.max(a, Math.min(b, v));
+  const chicken = () => CHICKENS[state.selectedChicken] || CHICKENS[0];
+
+  function init() {
+    load();
+    renderSelection();
+    setupListeners();
+    setInterval(gameLoop, 1000);
+  }
+
+  function load() {
+    const raw = localStorage.getItem(CONFIG.storageKey);
+    if (raw) { try { state = { ...state, ...JSON.parse(raw) } } catch (e) { console.warn("Save error", e); } }
+    offlineDecay();
+    ensureMissions();
+    ensureCollections();
+  }
+
+  function ensureCollections() {
+    state.ownedScenarios = Array.isArray(state.ownedScenarios) ? state.ownedScenarios : ["classic"];
+    state.ownedFurniture = Array.isArray(state.ownedFurniture) ? state.ownedFurniture : [];
+    state.furniture = Array.isArray(state.furniture) ? state.furniture : [];
+  }
+
+  function offlineDecay() {
+    const now = Date.now();
+    const hours = Math.max(0, (now - (state.lastUpdate || now)) / 3600000);
+    state.hunger = clamp(state.hunger - CONFIG.decay.hunger * hours);
+    state.hygiene = clamp(state.hygiene - CONFIG.decay.hygiene * hours);
+    state.fun = clamp(state.fun - CONFIG.decay.fun * hours);
+    state.lastUpdate = now;
+    if (now >= state.nextEggAt) state.eggReady = true;
+  }
+
+  function toast(msg) {
+    const t = $("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(toast.t);
+    toast.t = setTimeout(() => t.classList.remove("show"), 2500);
+  }
+
+  function speak(msg) {
+    const s = $("speech");
+    s.textContent = msg;
+    s.classList.add("show");
+    clearTimeout(s.t);
+    s.t = setTimeout(() => s.classList.remove("show"), 2800);
+  }
+
+  function random(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+  function personalityLine() { return random(chicken().quote); }
+
+  function directorFallback(imgEl) {
+    imgEl.onerror = null;
+    imgEl.src = "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><rect width="200" height="200" fill="#ffd1ea"/><text x="100" y="115" text-anchor="middle" font-size="80">👩‍💼</text></svg>`);
+  }
+
+  function renderSelection() {
+    ensureMissions();
+    const grid = $("chickenGrid");
+    grid.innerHTML = "";
+    CHICKENS.forEach((c, i) => {
+      const card = document.createElement("div");
+      card.className = "chicken-option";
+      const img = document.createElement("img");
+      img.src = c.file;
+      img.alt = c.name;
+      img.onerror = () => { img.onerror = null; img.src = fallback(c.name); };
+      card.innerHTML = `<div class="name">${c.name}</div><p class="hint">${c.hint}</p>`;
+      card.prepend(img);
+      const b = document.createElement("button");
+      b.className = "select-btn";
+      b.textContent = "Adotar 🐔";
+      b.onclick = () => adopt(i);
+      card.appendChild(b);
+      grid.appendChild(card);
+    });
+
+    const dHome = $("directorHomeImg");
+    if (dHome) {
+      dHome.src = "Diretora Carol - Galinha.png";
+      dHome.onerror = () => directorFallback(dHome);
+    }
+    renderHomeMissions();
+  }
+
+  function renderHomeMissions() {
+    const list = $("homeMissionsList");
+    if (!list) return;
+    let html = '<h4>📋 Metas de Auditoria:</h4>';
+    state.missions.forEach(m => {
+      html += `<div class="mission-preview-item ${m.done ? 'done' : ''}"><span>${m.text}</span><strong>${missionProgress(m)}</strong></div>`;
+    });
+    list.innerHTML = html;
+  }
+
+  function fallback(name) {
+    return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500"><rect width="500" height="500" fill="#eadcff"/><text x="250" y="245" text-anchor="middle" font-size="160">🐔</text><text x="250" y="350" text-anchor="middle" font-family="Inter" font-size="28" font-weight="bold" fill="#481fb8">${name}</text></svg>`);
+  }
+
+  function adopt(i) {
+    state.selectedChicken = i;
+    state.lastUpdate = Date.now();
+    save();
+    $("selectionScreen").classList.add("hidden");
+    $("gameScreen").classList.remove("hidden");
+    render();
+    speak(personalityLine());
+  }
+
+  function render() {
+    const c = chicken();
+    const petImg = $("petImage");
+    petImg.src = c.file;
+    petImg.alt = c.name;
+    petImg.onerror = () => { petImg.onerror = null; petImg.src = fallback(c.name); };
+    $("petName").textContent = c.name;
+    $("coins").textContent = state.coins;
+    $("foodCount").textContent = state.food;
+
+    [["hunger", state.hunger], ["hygiene", state.hygiene], ["fun", state.fun]].forEach(([k, v]) => {
+      $(k + "Value").textContent = Math.round(v) + "%";
+      $(k + "Fill").style.width = v + "%";
+    });
+
+    const sc = SCENARIOS.find(x => x.id === state.scenario) || SCENARIOS[0];
+    $("petStage").style.background = sc.bg;
+    $("scenarioLabel").textContent = sc.emoji + " " + sc.name;
+
+    const dWidget = $("directorWidgetImg");
+    if (dWidget) {
+      dWidget.src = "Diretora Carol - Galinha.png";
+      dWidget.onerror = () => directorFallback(dWidget);
+    }
+
+    renderFurniture();
+    renderEgg();
+    ensureMissions();
+    save();
+  }
+
+  function renderEgg() {
+    const now = Date.now();
+    if (state.eggReady) {
+      $("eggTitle").textContent = "Ovo pronto para coleta! 🥚";
+      $("eggTimer").textContent = "Venda por " + CONFIG.eggValue + " moedas.";
+      $("eggBtn").disabled = false;
+    } else {
+      $("eggTitle").textContent = "Incubando ovo...";
+      $("eggTimer").textContent = "Pronto em " + formatTime(state.nextEggAt - now);
+      $("eggBtn").disabled = true;
+    }
+  }
+
+  function formatTime(ms) {
+    let s = Math.max(0, Math.floor(ms / 1000)), h = Math.floor(s / 3600);
+    let m = Math.floor((s % 3600) / 60), sec = s % 60;
+    return h ? `${String(h).padStart(2, "0")}h ${String(m).padStart(2, "0")}m` : `${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
+  }
+
+  const Personality = {
+    feed() {
+      if (chicken().personality === "maumau" && Math.random() < 0.35) {
+        speak("NÃO! Minha pressão arterial sobe.");
+        animatePet("reject");
+        return false;
+      }
+      return true;
+    },
+    bath() { return true; },
+    pet() { speak(personalityLine()); return true; }
+  };
+
+  function animatePet(type) {
+    const img = $("petImage");
+    img.style.animation = "none";
+    img.offsetHeight;
+    img.style.transform = type === "reject" ? "rotate(-8deg) translateX(12px)" : "scale(1.05)";
+    setTimeout(() => { img.style.transform = ""; img.style.animation = "idle 3s ease-in-out infinite"; }, 400);
+  }
+
+  function feed() {
+    if (state.food <= 0) {
+      speak("Acabou a ração! Visite a loja.");
+      openShop();
+      return;
+    }
+    if (!Personality.feed()) return;
+    state.food--;
+    state.hunger = clamp(state.hunger + CONFIG.action.feed);
+    state.stats.fed++;
+    completeMission("feed");
+    speak("Cócócó! Refeição aceita.");
+    render();
+    save();
+  }
+
+  function bath() {
+    if (!Personality.bath()) return;
+    openBathModal();
+  }
+
+  function finishBath() {
+    state.hygiene = clamp(state.hygiene + CONFIG.action.bath);
+    state.stats.bath++;
+    completeMission("bath");
+    speak("Pronto. Limpo contra minha vontade.");
+    render();
+    save();
+  }
+
+  function petAction() {
+    Personality.pet();
+    state.fun = clamp(state.fun + CONFIG.action.fun);
+    state.stats.pet++;
+    completeMission("pet");
+    render();
+    save();
+  }
+
+  function collectEgg() {
+    if (!state.eggReady) return;
+    state.coins += CONFIG.eggValue;
+    state.stats.eggs++;
+    state.eggReady = false;
+    state.nextEggAt = Date.now() + CONFIG.eggCycle;
+    completeMission("egg");
+    toast(`Ovo vendido por ${CONFIG.eggValue} moedas! 🪙`);
+    render();
+    save();
+  }
+
+  function openModal(title, body) {
+    $("modalHost").innerHTML = `<div class="modal-backdrop" id="activeModal"><div class="modal"><div class="modal-header"><h2>${title}</h2><button class="close-btn" onclick="App.closeModal()">✕</button></div>${body}</div></div>`;
+  }
+  function closeModal() { $("modalHost").innerHTML = ""; }
+
+  function openShop() {
+    const body = `
+      <div class="notice">🛒 Adquira porções de milho fresco para manter a produtividade.</div>
+      <div class="shop-tabs"><button class="tab active">Alimentação</button></div>
+      <div class="shop-grid">
+        ${productItem("🌽", "Pacote de Milho", "+6 porções", 6, 6)}
+        ${productItem("🥕", "Ração Premium", "+14 porções", 12, 14)}
+        ${productItem("🥚", "Auxílio Rápido", "+1 porção", 2, 1)}
+      </div>
+    `;
+    openModal("🛒 Loja do Terreiro", body);
+  }
+
+  function productItem(icon, name, desc, price, amount) {
+    return `<div class="shop-product"><div class="big-icon">${icon}</div><div class="product-copy"><strong>${name}</strong><span>${desc}</span></div><button class="buy-btn" onclick="App.buyFood(${price},${amount})">🪙 ${price}</button></div>`;
+  }
+
+  function buyFood(price, amount) {
+    if (state.coins < price) { toast("Moedas insuficientes!"); return; }
+    state.coins -= price;
+    state.food += amount;
+    toast(`Compra realizada com sucesso!`);
+    render();
+    save();
+  }
+
+  function openScenery() {
+    let body = `
+      <div class="notice">🏡 Personalize seu galinheiro com cenários e móveis.</div>
+      <div class="shop-tabs"><button class="tab active">Decoração</button></div>
+      <div class="shop-grid">
+    `;
+    SCENARIOS.forEach(s => {
+      body += `<div class="shop-product"><div class="big-icon">${s.emoji}</div><div class="product-copy"><strong>${s.name}</strong><span>${s.price ? `🪙 ${s.price}` : "Grátis"}</span></div><button class="buy-btn" onclick="App.buyScenario('${s.id}')">${state.ownedScenarios.includes(s.id) ? "Usar" : "Comprar"}</button></div>`;
+    });
+    FURNITURE.forEach(f => {
+      body += `<div class="shop-product"><div class="big-icon">${f.emoji}</div><div class="product-copy"><strong>${f.name}</strong><span>🪙 ${f.price}</span></div><button class="buy-btn" onclick="App.buyFurniture('${f.id}')">${state.ownedFurniture.includes(f.id) ? "Posicionar" : "Comprar"}</button></div>`;
+    });
+    body += `</div>`;
+    openModal("🏡 Loja de Decoração", body);
+  }
+
+  function buyScenario(id) {
+    const s = SCENARIOS.find(x => x.id === id);
+    if (!s) return;
+    if (!state.ownedScenarios.includes(id)) {
+      if (state.coins < s.price) { toast("Moedas insuficientes!"); return; }
+      state.coins -= s.price;
+      state.ownedScenarios.push(id);
+    }
+    state.scenario = id;
+    render();
+    save();
+    openScenery();
+  }
+
+  function buyFurniture(id) {
+    const f = FURNITURE.find(x => x.id === id);
+    if (!f) return;
+    if (!state.ownedFurniture.includes(id)) {
+      if (state.coins < f.price) { toast("Moedas insuficientes!"); return; }
+      state.coins -= f.price;
+      state.ownedFurniture.push(id);
+    }
+    if (!state.furniture.some(x => x.id === id)) state.furniture.push({ id, x: 0.5, y: 0.75 });
+    render();
+    save();
+    openScenery();
+  }
+
+  function renderFurniture() {
+    document.querySelectorAll(".furniture").forEach(e => e.remove());
+    state.furniture.forEach((placed) => {
+      const f = FURNITURE.find(x => x.id === placed.id);
+      if (!f) return;
+      const el = document.createElement("div");
+      el.className = "furniture";
+      el.textContent = f.emoji;
+      el.style.left = (placed.x * 100) + "%";
+      el.style.top = (placed.y * 100) + "%";
+      makeDraggable(el, (x, y) => { placed.x = x; placed.y = y; save(); });
+      $("petStage").appendChild(el);
+    });
+  }
+
+  function makeDraggable(el, onMove) {
+    let dragging = false;
+    el.addEventListener("pointerdown", e => { dragging = true; el.setPointerCapture(e.pointerId); });
+    el.addEventListener("pointermove", e => {
+      if (!dragging) return;
+      const r = $("petStage").getBoundingClientRect();
+      const x = clamp((e.clientX - r.left) / r.width, 0.02, 0.92);
+      const y = clamp((e.clientY - r.top) / r.height, 0.15, 0.90);
+      el.style.left = (x * 100) + "%";
+      el.style.top = (y * 100) + "%";
+      onMove(x, y);
+    });
+    el.addEventListener("pointerup", () => dragging = false);
+  }
+
+  function openFoodDrag() {
+    const item = $("foodDrag");
+    if (!item) return;
+    item.addEventListener("dragstart", e => e.dataTransfer.setData("text/plain", "food"));
+    const stage = $("petStage");
+    stage.addEventListener("dragover", e => e.preventDefault());
+    stage.addEventListener("drop", e => {
+      e.preventDefault();
+      if (e.dataTransfer.getData("text/plain") === "food") feed();
+    });
+    let down = false;
+    item.addEventListener("pointerdown", () => down = true);
+    item.addEventListener("pointerup", e => {
+      if (!down) return;
+      const r = stage.getBoundingClientRect();
+      if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) feed();
+      down = false;
+    });
+  }
+
+  function openBathModal() {
+    openModal("🛁 Banho de Imersão", `<p>Esfregue a esponja vigorosamente pela banheira.</p><div id="bathArea" class="bath-area"><div id="sponge" class="bath-sponge">🧽</div></div><div class="notice" id="bathProgress" style="margin-top:10px">Esfregadas: 0/12</div>`);
+    const area = $("bathArea"), sponge = $("sponge");
+    let count = 0, lastX = 0, lastY = 0, drag = false;
+    const move = e => {
+      if (!drag) return;
+      const r = area.getBoundingClientRect();
+      const x = e.clientX - r.left, y = e.clientY - r.top;
+      sponge.style.left = clamp(x / r.width * 100, 4, 82) + "%";
+      sponge.style.top = clamp(y / r.height * 100, 4, 68) + "%";
+      if (Math.hypot(x - lastX, y - lastY) > 12) {
+        count++;
+        lastX = x; lastY = y;
+        $("bathProgress").textContent = `Esfregadas: ${Math.min(count, 12)}/12`;
+        if (count >= 12) { finishBath(); closeModal(); }
+      }
+    };
+    sponge.addEventListener("pointerdown", e => { drag = true; sponge.setPointerCapture(e.pointerId); lastX = e.clientX; lastY = e.clientY; });
+    sponge.addEventListener("pointermove", move);
+    sponge.addEventListener("pointerup", () => drag = false);
+  }
+
+  function dayKey() { return new Date().toISOString().slice(0, 10); }
+
+  function ensureMissions() {
+    if (state.missionDay === dayKey() && state.missions.length) return;
+    state.missionDay = dayKey();
+    state.missions = [
+      { id: "feed", text: "Alimentar a galinha 3 vezes", goal: 3, progress: () => state.stats.fed },
+      { id: "bath", text: "Concluir 2 banhos", goal: 2, progress: () => state.stats.bath },
+      { id: "quiz", text: "Gabaritar 2 Questões Jurídicas", goal: 2, progress: () => state.stats.quizCorrect },
+      { id: "egg", text: "Vender 2 ovos na bolsa", goal: 2, progress: () => state.stats.eggs }
+    ].map(x => ({ ...x, done: false }));
+    renderHomeMissions();
+  }
+
+  function completeMission(id) {
+    state.missions.forEach(m => {
+      if (m.id === id) { if (m.progress() >= m.goal) m.done = true; }
+    });
+    if (state.missions.every(m => m.done)) {
+      state.coins += 35;
+      toast("🏆 Auditoria Concluída! +35 moedas bônus!");
+      state.missions.forEach(m => m.done = false);
+    }
+    renderHomeMissions();
+  }
+
+  function missionProgress(m) { return `${Math.min(m.progress(), m.goal)}/${m.goal}`; }
+
+  function openMissions() {
+    ensureMissions();
+    let body = `<div class="notice">👩‍💼 <strong>Auditoria da Diretora Carolina:</strong><br>Metas obrigatórias para evitar sanções.</div>`;
+    state.missions.forEach(m => {
+      body += `<div class="mission ${m.done ? 'done' : ''}" style="background:#fcf8ff;border-left:4px solid var(--pink);border-radius:12px;padding:10px;margin-bottom:8px;"><small style="color:var(--muted)">Progresso: ${missionProgress(m)}</small><strong style="display:block;margin-top:2px">${m.text}</strong></div>`;
+    });
+    openModal("📋 Central de Metas", body);
+  }
+
+  function openDirectorChat() {
+    const quote = random(DIRECTOR_QUOTES);
+    let body = `
+      <div style="text-align:center;margin-bottom:14px">
+        <img src="Diretora Carol - Galinha.png" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid #ffabd1;background:#ffd1ea" onerror="this.onerror=null;this.src='data:image/svg+xml;charset=UTF-8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%2270%22 font-size=%2270%22>👩‍💼</text></svg>'">
+        <h3 style="margin:8px 0 2px;color:#9c1c5c">Diretora Carolina</h3>
+        <p style="color:#7c4e66;font-size:.85rem;margin:0;font-style:italic">" ${quote} "</p>
+      </div>
+      <div class="notice">👩‍💼 <strong>Parecer Técnico:</strong><br>Mantenha os índices acima de 60% para evitar notificações.</div>
+      <div style="display:grid;gap:8px;margin-top:14px">
+        <button class="select-btn" onclick="App.openMissions()" style="background:linear-gradient(135deg,var(--pink),#b82269)">📋 Ver Metas</button>
+        <button class="quick" onclick="App.directorPraise()" style="background:#f4ecff;color:var(--primary-dark);font-weight:900;padding:12px;border-radius:14px;width:100%;border:1px solid #dcd0ff">✨ Apresentar Defesa</button>
+      </div>
+    `;
+    openModal("Gabinete da Diretora", body);
+  }
+
+  function directorPraise() {
+    if (Math.random() > 0.4) {
+      state.coins += 10;
+      toast("A Diretora aceitou sua justificativa! +10 moedas 🪙");
+      openModal("Gabinete", `<p style="text-align:center;font-weight:900;color:#9c1c5c">✨ Argumento aceito. Tome 10 moedas.</p><button class="select-btn" onclick="App.closeModal()" style="margin-top:10px">Obrigado!</button>`);
+    } else {
+      toast("Defesa rejeitada por insuficiência de provas.");
+      openModal("Gabinete", `<p style="text-align:center;font-weight:900;color:#7c4e66">📋 Argumento sem respaldo jurídico.</p><button class="select-btn" onclick="App.closeModal()" style="margin-top:10px">Entendido</button>`);
+    }
+    render();
+    save();
+  }
+
+  function openQuiz() {
+    const q = random(QUIZ);
+    let body = `<div class="quiz-q">${q.q}</div><div class="quiz-options">`;
+    q.a.forEach((opt, idx) => {
+      body += `<button class="quiz-option" onclick="App.answerQuiz(${idx},${q.c},'${encodeURIComponent(q.e)}')">${opt}</button>`;
+    });
+    body += `</div>`;
+    openModal("⚖️ Exame Jurídico", body);
+  }
+
+  function answerQuiz(idx, correct, encodedExp) {
+    state.stats.quiz++;
+    const exp = decodeURIComponent(encodedExp);
+    const right = (idx === correct);
+    if (right) {
+      state.coins += 20;
+      state.stats.quizCorrect++;
+      toast("Resposta Correta! +20 moedas 🪙");
+    } else {
+      toast("Resposta incorreta!");
+    }
+    completeMission("quiz");
+    openModal("⚖️ Resultado", `<div class="quiz-result">${right ? "✅ Aprovado na banca!" : "❌ Reprovado pela banca."}</div><p style="margin-top:12px;line-height:1.35">${exp}</p><button class="select-btn" onclick="App.openQuiz()" style="margin-top:14px">Próxima Questão</button>`);
+    render();
+    save();
+  }
+
+  function gameLoop() {
+    state.hunger = clamp(state.hunger - 0.035);
+    state.hygiene = clamp(state.hygiene - 0.025);
+    state.fun = clamp(state.fun - 0.03);
+    state.lastUpdate = Date.now();
+
+    if (!state.eggReady && Date.now() >= state.nextEggAt) {
+      state.eggReady = true;
+      render();
+    }
+
+    [["hunger", state.hunger], ["hygiene", state.hygiene], ["fun", state.fun]].forEach(([k, v]) => {
+      const el = $(k + "Value");
+      if (el) el.textContent = Math.round(v) + "%";
+      const fill = $(k + "Fill");
+      if (fill) fill.style.width = v + "%";
+    });
+    save();
+  }
+
+  function setupListeners() {
+    $("feedBtn").onclick = feed;
+    $("bathBtn").onclick = bath;
+    $("petBtn").onclick = petAction;
+    $("eggBtn").onclick = collectEgg;
+    $("missionsBtn").onclick = openMissions;
+    $("quizBtn").onclick = openQuiz;
+    $("shopBtn").onclick = openShop;
+    $("sceneryBtn").onclick = openScenery;
+    $("changeChickenBtn").onclick = () => {
+      $("gameScreen").classList.add("hidden");
+      $("selectionScreen").classList.remove("hidden");
+      renderSelection();
+    };
+    $("resetBtn").onclick = () => {
+      if (confirm("Deseja reiniciar o galinheiro?")) {
+        localStorage.removeItem(CONFIG.storageKey);
+        location.reload();
+      }
+    };
+    openFoodDrag();
+  }
+
+  return {
+    init, closeModal, buyFood, buyScenario, buyFurniture,
+    answerQuiz, openQuiz, openDirectorChat, directorPraise, openMissions
+  };
+})();
+
+window.addEventListener("DOMContentLoaded", App.init);
+</script>
+</body>
+</html>
